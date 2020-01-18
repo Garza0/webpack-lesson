@@ -5,6 +5,8 @@ import WebpackLogo from '@/assets/webp'
 import './styles/styles.css'
 const post = new Post('Webpack Post Title', WebpackLogo)
 
-console.log('Post To string:', post.toString())
 
-console.log('json', json)
+$('pre').addClass('code').html(post.toString())
+// console.log('Post To string:', post.toString())
+
+// console.log('json', json)
