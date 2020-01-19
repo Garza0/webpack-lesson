@@ -10,17 +10,22 @@ const isDev = process.env.NODE_ENV === 'development'
 const isProd = !isDev
 
 const cssLoaders = extra => {
-  const loader = [
+  const loaders = [
     {
       loader: MiniCssExtractPlugin.loader,
       options: {
         hmr: isDev,
         reloadAll: true
       },
-    }, 'css-loader'],
+    },
+    'css-loader'
+  ]
+
   if (extra) {
     loaders.push(extra)
   }
+
+  return loaders
 }
 
 const optimization = () => {
@@ -47,8 +52,8 @@ module.exports = {
   context: path.resolve(__dirname, 'src'),
   mode: 'development',
   entry: {
-    main: './index.js',
-    analytics: './analytics.js'
+    main: ['@babel/polyfill', './index.js'],
+    analytics: './analytics.ts'
   },
   output: {
     filename: filename('js'),
@@ -114,7 +119,33 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel-loader'
+        loader: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env'
+            ],
+            plugins: [
+              '@babel/plugin-proposal-class-properties'
+            ]
+          }
+        }
+      },
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        loader: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              '@babel/preset-typescript'
+            ],
+            plugins: [
+              '@babel/plugin-proposal-class-properties'
+            ]
+          }
+        }
       }
     ]
   }
