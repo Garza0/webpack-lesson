@@ -3,10 +3,45 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const TerserWebpackPlugin = require('terser-webpack-plugin')
 
 const isDev = process.env.NODE_ENV === 'development'
-console.log('IS DEV', isDev)
+const isProd = !isDev
+
+const cssLoaders = extra => {
+  const loader = [
+    {
+      loader: MiniCssExtractPlugin.loader,
+      options: {
+        hmr: isDev,
+        reloadAll: true
+      },
+    }, 'css-loader'],
+  if (extra) {
+    loaders.push(extra)
+  }
+}
+
+const optimization = () => {
+
+  config = {
+    splitChunks: {
+      chunks: 'all'
+    }
+  }
+  if (isProd) {
+    config.minimizer = [
+      new OptimizeCssAssetsPlugin(),
+      new TerserWebpackPlugin()
+    ]
+  }
+
+  return config
+}
+
+
+const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
 
 module.exports = {
   context: path.resolve(__dirname, 'src'),
@@ -16,7 +51,7 @@ module.exports = {
     analytics: './analytics.js'
   },
   output: {
-    filename: '[name].[contenthash].js',
+    filename: filename('js'),
     path: path.resolve(__dirname, 'dist')
   },
   resolve: {
@@ -26,11 +61,7 @@ module.exports = {
       '@': path.resolve(__dirname, 'src')
     }
   },
-  optimization: {
-    splitChunks: {
-      chunks: 'all'
-    }
-  },
+  optimization: optimization(),
   devServer: {
     port: 4200,
     hot: isDev
@@ -39,6 +70,9 @@ module.exports = {
     new HTMLWebpackPlugin({
 
       template: './index.html',
+      minify: {
+        collapseWhitespace: isProd
+      }
     }),
     new CleanWebpackPlugin(),
     new CopyWebpackPlugin([
@@ -48,7 +82,7 @@ module.exports = {
       }
     ]),
     new MiniCssExtractPlugin({
-      filename: '[name].[contenthash].css'
+      filename: filename('css')
     })
 
   ],
@@ -56,13 +90,17 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        use: [{
-          loader: MiniCssExtractPlugin.loader,
-          options: {
-            hmr: isDev,
-            reloadAll: true
-          },
-        }, 'css-loader'],
+        use: cssLoaders()
+
+      },
+      {
+        test: /\.less$/,
+        use: cssLoaders('less-loader')
+
+      },
+      {
+        test: /\.s[ac]ss$/,
+        use: cssLoaders('sass-loader')
 
       },
       {
@@ -72,6 +110,11 @@ module.exports = {
       {
         test: /\.(ttf|woff|woff2|eot)/,
         use: ['file-loader']
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader'
       }
     ]
   }
