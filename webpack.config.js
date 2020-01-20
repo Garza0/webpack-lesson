@@ -53,7 +53,7 @@ const babelOptions = preset => {
 
 const optimization = () => {
 
-  config = {
+  let config = {
     splitChunks: {
       chunks: 'all'
     }
@@ -67,7 +67,18 @@ const optimization = () => {
 
   return config
 }
+const jsLoaders = () => {
+  const loaders = [{
+    loader: 'babel-loader',
+    options: babelOptions()
+  }]
 
+  if (isDev) {
+    loaders.push('eslint-loader')
+  }
+
+  return loaders
+}
 
 const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
 
@@ -94,6 +105,7 @@ module.exports = {
     port: 4200,
     hot: isDev
   },
+  devtool: isDev ? 'source-map' : '',
   plugins: [
     new HTMLWebpackPlugin({
 
@@ -142,10 +154,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: {
-          loader: 'babel-loader',
-          options: babelOptions()
-        }
+        use: jsLoaders()
       },
       {
         test: /\.ts$/,

@@ -15,7 +15,7 @@ const post = new Post('Webpack Post Title', WebpackLogo)
 // $('pre').addClass('code').html(post.toString())
 
 
-const App = () => {
+const App = () => (
   <div className="container">
     <h1>Webpack Course</h1>
     <hr />
@@ -32,7 +32,7 @@ const App = () => {
     </div>
 
   </div>
-}
+)
 render(<App />, document.getElementById('app'))
 // console.log('Post To string:', post.toString())
 
