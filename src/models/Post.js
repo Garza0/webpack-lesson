@@ -17,3 +17,4 @@ export default class Post {
     return this.title.toUpperCase()
   }
 }
+
